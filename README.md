@@ -13,11 +13,11 @@ PKCE OIDC Auth Flow from Salesforce
 3. Create Custom Metadata Type with Azure values.
 	1. Clone this git repo to your desktop. Go to force-app package in your local repo, and go to the subfolder for customMetadata.
 	2. Open the customMetadata record called 'AuthProviderCredential.PKCEAzure.md-meta' in a text editor.
-	3. Everywhere you see '<Directory ID>', replace it with the directory id in step 2.
-	4. Replace '<client id>' with the client id from step 1.
-	5. Replace '<client secret>' with the client secret from step 1.
-	6. Replace '<domain>' with the domain of your salesforce org (e.g. 'my-awesome-org').
-	7. Replace '<name of your auth provider>' with whatever name you want to give your auth provider. I used 'PKCEAzure'.
+	3. Everywhere you see 'Directory ID', replace it with the directory id in step 2.
+	4. Replace 'client id' with the client id from step 1.
+	5. Replace 'client secret' with the client secret from step 1.
+	6. Replace 'domain' with the domain of your salesforce org (e.g. 'my-awesome-org').
+	7. Replace 'name of your auth provider' with whatever name you want to give your auth provider. I used 'PKCEAzure'.
 4. Deploy base metadata in Salesforce.
 	1. Deploy the force-app folders for objects, customMetadata, and remoteSiteSettings to your Salesforce org.
 5. Update Apex Class records for org cache.
