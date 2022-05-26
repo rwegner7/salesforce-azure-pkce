@@ -7,7 +7,7 @@ global class PKCEAzure extends Auth.AuthProviderPluginClass {
     private String scope;
     private String userInfoUrl;
     private String redirectUri;
-    private final static String cachePartition = 'local.Bedrock'; //TODO change this to your partition
+    private final static String cachePartition = 'local.Bedrock'; //change this to your partition
     String codeVerifier = generateRandomString(34);
     Blob sha256 = Crypto.generateDigest('SHA-256', Blob.valueOf(codeVerifier));
     String codeChallenge = base64EncodeURL(sha256);
@@ -54,6 +54,7 @@ global class PKCEAzure extends Auth.AuthProviderPluginClass {
         redirectUri = authProviderConfiguration.get('Redirect_URI__c');
         String url = authorizationUrl+'?client_id='+clientId+'&response_type=code&scope='+scope+'&redirect_uri='+redirectUri
                 +'&code_challenge_method=S256&code_challenge='+codeChallenge+'&state='+stateToPropagate;
+        System.debug('::: url ::: ' + url);
         //authenticate the user, the auth code is returned in the callback method below
         return new PageReference(url);
     }
@@ -76,6 +77,8 @@ global class PKCEAzure extends Auth.AuthProviderPluginClass {
         String requestBody = 'grant_type=authorization_code&client_id='+clientId+'&client_secret='+clientSecret+'&code='+code
                 +'&redirect_uri='+redirectUri+'&state='+sfdcState +'&code_verifier='+cachedValues[1];
 
+        System.debug('::: requestBody ::: ' + requestBody);
+
         HttpRequest req = new HttpRequest();
         req.setEndpoint(accessTokenURL);
         req.setHeader('Accept','application/json');
@@ -85,13 +88,13 @@ global class PKCEAzure extends Auth.AuthProviderPluginClass {
         Http http = new Http();
         HttpResponse res = http.send(req);
         String responseBody = res.getBody();
-
+        System.debug('::: responseBody ::: ' + responseBody);
         //parse the response from the auth code
         AzureResponse response = (AzureResponse) JSON.deserialize(responseBody, AzureResponse.class);
 
         //store the access token in the cache, using the user id and PKCEToken as the key
         hashKey = cachedValues[0] + 'PKCEToken';
-        Cache.Org.getPartition(cachePartition).put(hashKey, response.access_token, 5000);
+        Cache.Org.getPartition(cachePartition).put(hashKey, response.access_token, 1800);
 
         return new Auth.AuthProviderTokenResponse('PKCEAzure', response.access_token, null, sfdcState);
     }
