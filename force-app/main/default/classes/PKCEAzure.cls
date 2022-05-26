@@ -54,7 +54,7 @@ global class PKCEAzure extends Auth.AuthProviderPluginClass {
         redirectUri = authProviderConfiguration.get('Redirect_URI__c');
         String url = authorizationUrl+'?client_id='+clientId+'&response_type=code&scope='+scope+'&redirect_uri='+redirectUri
                 +'&code_challenge_method=S256&code_challenge='+codeChallenge+'&state='+stateToPropagate;
-        System.debug('::: url ::: ' + url);
+        System.debug('auth url ::: ' + url);
         //authenticate the user, the auth code is returned in the callback method below
         return new PageReference(url);
     }
@@ -77,7 +77,7 @@ global class PKCEAzure extends Auth.AuthProviderPluginClass {
         String requestBody = 'grant_type=authorization_code&client_id='+clientId+'&client_secret='+clientSecret+'&code='+code
                 +'&redirect_uri='+redirectUri+'&state='+sfdcState +'&code_verifier='+cachedValues[1];
 
-        System.debug('::: requestBody ::: ' + requestBody);
+        System.debug('request body ::: ' + requestBody);
 
         HttpRequest req = new HttpRequest();
         req.setEndpoint(accessTokenURL);
@@ -88,7 +88,7 @@ global class PKCEAzure extends Auth.AuthProviderPluginClass {
         Http http = new Http();
         HttpResponse res = http.send(req);
         String responseBody = res.getBody();
-        System.debug('::: responseBody ::: ' + responseBody);
+        System.debug('response body ::: ' + responseBody);
         //parse the response from the auth code
         AzureResponse response = (AzureResponse) JSON.deserialize(responseBody, AzureResponse.class);
 
