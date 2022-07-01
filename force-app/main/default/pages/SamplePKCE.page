@@ -1,0 +1,55 @@
+<apex:page id="SamplePKCE" controller="SamplePKCEController">
+    <apex:includeScript value="{!URLFOR($Resource.msalBrowser, '/msal-browser.js')}"/>
+
+    <apex:form >
+        <apex:actionFunction name="setResponseJS" action="{!setResponse}" reRender="form">
+            <apex:param name="resp" value="" assignTo="{!resp}"/>
+        </apex:actionFunction>
+    </apex:form>
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </head>
+    <html>
+    <body>
+    <button onclick="login()">Login</button>
+    <!-- Trigger/Open The Modal -->
+    <div id="myModal" class="modal"></div>
+    </body>
+    </html>
+    <script>
+        function login() {
+            const m = document.getElementById("myModal");
+            m.style.display = "block";
+
+            const msalConfig = {
+                auth: {
+                    clientId: "",
+                    authority: "https://login.microsoftonline.com/",
+                }
+            };
+
+            const loginRequest = {
+                scopes: ["Device.Read.All"],
+                prompt: "select_account"
+            };
+
+            const myMSALObj = new msal.PublicClientApplication(msalConfig);
+
+            myMSALObj
+                .loginPopup(loginRequest)
+                .then((resp) => {
+                    if(resp){
+                        console.log('resp ::: ' + JSON.stringify(resp));
+                        const deviceid = JSON.parse(window.atob(resp.accessToken.split('.')[1])).deviceid;
+                        console.log('device id ::: ' + deviceid);
+                        setResponseJS(JSON.stringify(resp));
+                    }
+                })
+                .catch((e) => alert(e))
+                .finally(() => {
+                    m.style.display = "none";
+                });
+        }
+    </script>
+</apex:page>
