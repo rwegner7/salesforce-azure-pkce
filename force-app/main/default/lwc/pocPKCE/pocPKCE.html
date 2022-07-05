@@ -1,0 +1,14 @@
+<template>
+    <div class="slds-hide">
+        <lightning-button label="Login" variant="brand" class="" onclick={initiateVFAuthCall}></lightning-button>
+        <template if:true={accessToken}>
+            <p style="word-break: break-word" class="">Token: {accessToken}</p>
+        </template>
+        <template if:true={workstationId}>
+            <p style="word-break: break-word" class="">Workstation Id: {workstationId}</p>
+        </template>
+        <template if:true={loadFrame}>
+            <iframe height="0" width="100%" class="slds-hide" src="/apex/POCPKCE" sandbox="allow-modals allow-same-origin allow-scripts allow-popups allow-popups-to-escape-sandbox"></iframe>
+        </template>
+    </div>
+</template>
