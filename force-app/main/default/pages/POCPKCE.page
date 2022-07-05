@@ -1,0 +1,74 @@
+<apex:page id="POCPKCE" controller="POC_PKCE">
+    <apex:includeScript value="{!URLFOR($Resource.msalBrowser, '/msal-browser.js')}"/>
+    <apex:slds />
+    <apex:form >
+        <apex:actionFunction name="setResponseJS" action="{!setResponse}" reRender="form">
+            <apex:param name="resp" value="" assignTo="{!resp}"/>
+        </apex:actionFunction>
+    </apex:form>
+    <div id="authModal" class="modal"></div>
+    <script>
+        //match received messages with lightning experience origin
+        const lexOrigin = '{!origin}' + '.lightning.force.com';
+
+        //add listener for messages from LWC
+        window.addEventListener("message", function (event) {
+            console.log('>>> Calling origin: ' + event.origin);
+            console.log('>>> Expected origin: ' + lexOrigin);
+            if (event.origin.toLowerCase() === lexOrigin.toLowerCase()) {
+                const msg = event.data;
+                console.log('>>> LWC message: ' + msg);
+                if(msg === 'pkce_login'){
+                    console.log('>>> Calling login.');
+                    login();
+                }
+            }
+        });
+
+        //azure ad pkce login
+        function login() {
+            const m = document.getElementById("authModal");
+            m.style.display = "block";
+
+            const msalConfig = {
+                auth: {
+                    clientId: '{!$Setup.CS_AzurePKCE__c.ClientId__c}',
+                    authority: '{!$Setup.CS_AzurePKCE__c.Authority__c}',
+                }
+            };
+
+            const loginRequest = {
+                scopes: ["Device.Read.All"],
+                prompt: "select_account"
+            };
+
+            const myMSALObj = new msal.PublicClientApplication(msalConfig);
+
+            myMSALObj
+                .loginPopup(loginRequest)
+                .then((resp) => {
+                    if(resp){
+                        const response = JSON.stringify(resp);
+                        console.log('>>> Auth Response: ' + response);
+                        //pass response to apex controller (e.g. if you want to store in session cache)
+                        setResponseJS(response);
+                        //send message to parent lwc
+                        const message = resp.accessToken;
+                        window.parent.postMessage(message, lexOrigin.toLowerCase());
+                    }
+                })
+                .catch((e) => alert(e))
+                .finally(() => {
+                    m.style.display = "none";
+                });
+        }
+
+        //alert parent lwc when loaded
+        function ready() {
+            const message = 'vf-ready';
+            window.parent.postMessage(message, lexOrigin.toLowerCase());
+        }
+
+        ready();
+    </script>
+</apex:page>
